@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CategoriasService } from './categorias.service';
+import { AtualizarCategoriaDto } from './dto/atualizarCategoriaDto';
 import { CriarCategoriaDto } from './dto/criarCategoria.dto';
 import { Categoria } from './interfaces/categoria.interface';
+import { CategoriasValidationParametrosPipe } from './validations/categorias.validation.pipe';
 
 @Controller('api/v1/categorias')
 export class CategoriasController {
@@ -13,24 +15,28 @@ export class CategoriasController {
         return await this.categoriasService.criarCategoria(criarCategoriaDto)
     };
 
-    // @Put('/:_id') @UsePipes(ValidationPipe)
-    // async atualizarJogador(
-    //     @Body() atualizarJogadorDto: AtualizarJogadorDto,
-    //     @Param('_id', JogadoresValidationParametrosPipe) _id: string): Promise<void> {
-    //     await this.jogadoresService.updateJogador(_id, atualizarJogadorDto)
-    // };
+    @Put('/:categoria') @UsePipes(ValidationPipe)
+    async atualizarCategoria(
+        @Body() atualizarCategoriaDto: AtualizarCategoriaDto,
+        @Param('categoria') categoria: string): Promise<void> {
+        await this.categoriasService.updateCategoria(categoria, atualizarCategoriaDto)
+    };
+
+    @Post('/:categoria/jogadores/:idJogador')
+    async atriguirCategoriaJogador(@Param() params: string[]): Promise<void> {
+        return await this.categoriasService.atribuirCategoriaJogador(params)
+    }
 
     @Get()
     async allCategorias(): Promise<Categoria[]> {
         return await this.categoriasService.consultarAllCategorias()
     }
 
-    // @Get('/:_id')
-    // async idJogador(
-    //     @Param('_id', JogadoresValidationParametrosPipe) _id: string): Promise<Jogador> {
-    //     const jogador = await this.jogadoresService.consultarJogadorId(_id)
-    //     return jogador;
-    // }
+    @Get('/:categoria')
+    async constularCategoriaId(
+        @Param('categoria', CategoriasValidationParametrosPipe) categoria: string): Promise<Categoria> {
+        return await this.categoriasService.consultarCategoriaId(categoria)
+    }
 
     // @Delete('/:_id')
     // async deleteJogador(

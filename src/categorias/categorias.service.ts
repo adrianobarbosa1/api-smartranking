@@ -1,13 +1,18 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { exec } from 'child_process';
 import { Model } from 'mongoose'
+import { JogadoresService } from 'src/jogadores/jogadores.service';
+import { AtualizarCategoriaDto } from './dto/atualizarCategoriaDto';
 import { CriarCategoriaDto } from './dto/criarCategoria.dto';
 import { Categoria } from './interfaces/categoria.interface';
 
 @Injectable()
 export class CategoriasService {
 
-    constructor(@InjectModel('Categoria') private readonly categoriaModel: Model<Categoria>) { }
+    constructor(@InjectModel('Categoria')
+    private readonly categoriaModel: Model<Categoria>,
+        private readonly jogadoresService: JogadoresService) { }
 
     private readonly logger = new Logger(CategoriasService.name)
 
@@ -21,21 +26,49 @@ export class CategoriasService {
         return await categoriaCriada.save();
     }
 
-    // async updateJogador(_id: string, atualizarJogadorDto: AtualizarJogadorDto): Promise<void> {
-    //     const jogadorEncontrado = await this.jogadorModel.findOne({ _id }).exec();
-    //     this.jogadorNaoEncontrado(jogadorEncontrado)
-    //     await this.jogadorModel.findOneAndUpdate({ _id }, { $set: atualizarJogadorDto }).exec()
-    // }
-
-    async consultarAllCategorias(): Promise<Categoria[]> {
-        return await this.categoriaModel.find().exec()
+    async updateCategoria(categoria: string, atualizarCategoriaDto: AtualizarCategoriaDto): Promise<void> {
+        const categoriaEncontrada = await this.categoriaModel.findOne({ categoria }).exec();
+        if (!categoriaEncontrada) {
+            throw new NotFoundException(`categoria não encontrada`)
+        }
+        await this.categoriaModel.findOneAndUpdate({ categoria }, { $set: atualizarCategoriaDto }).exec()
     }
 
-    // async consultarJogadorId(_id: string): Promise<Jogador> {
-    //     const jogador = await this.jogadorModel.findOne({ _id }).exec();
-    //     this.jogadorNaoEncontrado(jogador)
-    //     return jogador;
-    // }
+    async consultarAllCategorias(): Promise<Categoria[]> {
+        return await this.categoriaModel.find().populate("jogadores").exec()
+    }
+
+    async consultarCategoriaId(categoria: string): Promise<Categoria> {
+        const categoriaEncontrada = await this.categoriaModel.findOne({ categoria }).exec();
+        if (!categoriaEncontrada) {
+            throw new NotFoundException(`categoria não encontrada`)
+        }
+        return categoriaEncontrada;
+    }
+
+    async atribuirCategoriaJogador(params: string[]): Promise<void> {
+        const categoria = params['categoria']
+        const idJogador = params['idJogador']
+        const categoriaEncontrada = await this.categoriaModel.findOne({ categoria }).exec()
+        const jogadorCadastradoCategoria = await this.categoriaModel
+            .find({ categoria })
+            .where('jogadores')
+            .in(idJogador)
+            .exec()
+
+        await this.jogadoresService.consultarJogadorId(idJogador)
+
+        if (!categoriaEncontrada) {
+            throw new BadRequestException(`categoria não encontrada`)
+        }
+        if (jogadorCadastradoCategoria.length > 0) {
+            throw new BadRequestException(`jogador ja cadastrado na categoria`)
+        }
+
+        categoriaEncontrada.jogadores.push(idJogador)
+        await this.categoriaModel.findOneAndUpdate(
+            { categoria }, { $set: categoriaEncontrada }).exec()
+    }
 
     // async deleteJogador(_id: string): Promise<any> {
     //     const jogador = await this.jogadorModel.findOne({ _id }).exec();
@@ -43,9 +76,4 @@ export class CategoriasService {
     //     return await this.jogadorModel.deleteOne({ _id }).exec()
     // }
 
-    // private async jogadorNaoEncontrado(jogador: Jogador): Promise<void> {
-    //     if (!jogador) {
-    //         throw new NotFoundException(`jogador não encontrado`)
-    //     }
-    // }
 }
