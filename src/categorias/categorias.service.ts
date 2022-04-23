@@ -27,9 +27,9 @@ export class CategoriasService {
     //     await this.jogadorModel.findOneAndUpdate({ _id }, { $set: atualizarJogadorDto }).exec()
     // }
 
-    // async consultarTodosJogadores(): Promise<Jogador[]> {
-    //     return await this.jogadorModel.find().exec()
-    // }
+    async consultarAllCategorias(): Promise<Categoria[]> {
+        return await this.categoriaModel.find().exec()
+    }
 
     // async consultarJogadorId(_id: string): Promise<Jogador> {
     //     const jogador = await this.jogadorModel.findOne({ _id }).exec();

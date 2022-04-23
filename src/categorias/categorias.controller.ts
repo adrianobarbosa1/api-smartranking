@@ -20,10 +20,10 @@ export class CategoriasController {
     //     await this.jogadoresService.updateJogador(_id, atualizarJogadorDto)
     // };
 
-    // @Get()
-    // async todosJogadores(): Promise<Jogador[]> {
-    //     return await this.jogadoresService.consultarTodosJogadores()
-    // }
+    @Get()
+    async allCategorias(): Promise<Categoria[]> {
+        return await this.categoriasService.consultarAllCategorias()
+    }
 
     // @Get('/:_id')
     // async idJogador(
