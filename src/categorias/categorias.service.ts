@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { exec } from 'child_process';
 import { Model } from 'mongoose'
 import { JogadoresService } from 'src/jogadores/jogadores.service';
 import { AtualizarCategoriaDto } from './dto/atualizarCategoriaDto';

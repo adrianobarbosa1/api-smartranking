@@ -1,17 +1,14 @@
-import { ArrayMinSize, IsArray, IsNotEmpty, IsString } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsDateString, IsNotEmpty } from "class-validator";
+import { Jogador } from "src/jogadores/interfaces/jogador.interface";
 
-export class CriarCategoriaDto {
+export class CriarDesafioDto {
 
-    @IsString() @IsNotEmpty()
-    readonly categoria: string;
+    @IsDateString() @IsNotEmpty()
+    dataHoraDesafio: Date;
 
-    @IsString() @IsNotEmpty()
-    descricao: string;
+    @IsNotEmpty()
+    solicitante: Jogador;
 
-    @IsArray() @ArrayMinSize(1)
-    eventos: Array<Evento>
-}
-
-export class Evento {
-
+    @IsArray() @ArrayMinSize(2) @ArrayMaxSize(2)
+    jogadores: Jogador[]
 }
