@@ -3,8 +3,8 @@ import { IsNotEmpty } from 'class-validator'
 export class AtualizarJogadorDto {
 
     @IsNotEmpty()
-    readonly fone: string;
-
+    readonly telefoneCelular: string;
+    
     @IsNotEmpty()
     readonly nome: string;
 }

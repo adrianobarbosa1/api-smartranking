@@ -6,14 +6,12 @@ import { DesafiosModule } from './desafios/desafios.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/apijogador',
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }),
+    MongooseModule.forRoot('mongodb+srv://admin_sr:7Fo50X1WDaCtasB6@clustermogodb-79l5n.mongodb.net/smartranking?retryWrites=true&w=majority',
+    { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false }),
     JogadoresModule,
     CategoriasModule,
-    DesafiosModule
-  ],
+    DesafiosModule],
+  controllers: [],
+  providers: [],
 })
-export class AppModule { }
+export class AppModule {}

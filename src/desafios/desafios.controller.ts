@@ -1,45 +1,56 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { CriarDesafioDto } from 'src/categorias/dto/criarCategoria.dto';
-import { DesafiosService } from './desafios.service';
+import { Controller, Post, UsePipes, ValidationPipe, Body, Get, Query, Put, Param, Delete, Logger } from '@nestjs/common';
+import { DesafiosService } from './desafios.service'
+import { CriarDesafioDto } from './dtos/criar-desafio.dto'
 import { Desafio } from './interfaces/desafio.interface';
+import { DesafioStatusValidacaoPipe } from './pipes/desafio-status-validation.pipe';
+import { AtribuirDesafioPartidaDto } from './dtos/atribuir-desafio-partida.dto';
+import { AtualizarDesafioDto } from './dtos/atualizar-desafio.dto';
 
+/*
+Desafio
+*/
 
 @Controller('api/v1/desafios')
 export class DesafiosController {
 
-    constructor(private readonly desafiosService: DesafiosService) { }
+    constructor(private readonly desafiosService: DesafiosService){}
 
-    @Post() @UsePipes(ValidationPipe)
-    async criarDesafio(@Body() criarDesafioDto: CriarDesafioDto): Promise<Desafio> {
-        return await this.desafiosService.criarDesafio(criarDesafioDto)
-    };
+    private readonly logger = new Logger(DesafiosController.name)
 
-    // @Put('/:categoria') @UsePipes(ValidationPipe)
-    // async atualizarCategoria(
-    //     @Body() atualizarCategoriaDto: AtualizarCategoriaDto,
-    //     @Param('categoria') categoria: string): Promise<void> {
-    //     await this.categoriasService.updateCategoria(categoria, atualizarCategoriaDto)
-    // };
+    @Post()
+    @UsePipes(ValidationPipe)
+    async criarDesafio(
+        @Body() criarDesafioDto: CriarDesafioDto): Promise<Desafio> {
+            this.logger.log(`criarDesafioDto: ${JSON.stringify(criarDesafioDto)}`)
+            return await this.desafiosService.criarDesafio(criarDesafioDto)
+    }
+    
+    @Get()
+    async consultarDesafios(
+        @Query('idJogador') _id: string): Promise<Array<Desafio>> {
+        return _id ? await this.desafiosService.consultarDesafiosDeUmJogador(_id) 
+        : await this.desafiosService.consultarTodosDesafios()
+    }
 
-    // @Post('/:categoria/jogadores/:idJogador')
-    // async atriguirCategoriaJogador(@Param() params: string[]): Promise<void> {
-    //     return await this.categoriasService.atribuirCategoriaJogador(params)
-    // }
+    @Put('/:desafio')
+    async atualizarDesafio(
+        @Body(DesafioStatusValidacaoPipe) atualizarDesafioDto: AtualizarDesafioDto,
+        @Param('desafio') _id: string): Promise<void> {
+            await this.desafiosService.atualizarDesafio(_id, atualizarDesafioDto)
 
-    // @Get()
-    // async allCategorias(): Promise<Categoria[]> {
-    //     return await this.categoriasService.consultarAllCategorias()
-    // }
+        }    
 
-    // @Get('/:categoria')
-    // async constularCategoriaId(
-    //     @Param('categoria', CategoriasValidationParametrosPipe) categoria: string): Promise<Categoria> {
-    //     return await this.categoriasService.consultarCategoriaId(categoria)
-    // }
+   @Post('/:desafio/partida/')
+   async atribuirDesafioPartida(
+       @Body(ValidationPipe) atribuirDesafioPartidaDto: AtribuirDesafioPartidaDto,
+       @Param('desafio') _id: string): Promise<void> {
+        return await this.desafiosService.atribuirDesafioPartida(_id, atribuirDesafioPartidaDto)           
+   }
 
-    // @Delete('/:_id')
-    // async deleteJogador(
-    //     @Param('_id', JogadoresValidationParametrosPipe) _id: string): Promise<void> {
-    //     await this.jogadoresService.deleteJogador(_id)
-    // }
+   @Delete('/:_id')
+   async deletarDesafio(
+       @Param('_id') _id: string): Promise<void> {
+           this.desafiosService.deletarDesafio(_id)
+    }
+
 }
